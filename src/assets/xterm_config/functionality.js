@@ -43,7 +43,7 @@ function inflateOptions(optionsSchema) {
     while (children.length > 0) document.body.append(children[0]);
   }
 
-  optionsSchema.forEach(option => {
+  optionsSchema.forEach((option) => {
     let el;
     option.get = optionGenericGet.bind(option);
     option.set = optionGenericSet.bind(option);
@@ -57,7 +57,7 @@ function inflateOptions(optionsSchema) {
 
       case 'enum':
         el = enumOption.cloneNode(true);
-        option.enum.forEach(varriant => {
+        option.enum.forEach((varriant) => {
           const optionEl = document.createElement('option');
           optionEl.innerText = varriant;
           optionEl.value = varriant;
@@ -114,8 +114,8 @@ function setItem(json, path, item) {
   }
 }
 
-window.loadOptions = config => {
-  allOptions.forEach(option => {
+window.loadOptions = (config) => {
+  allOptions.forEach((option) => {
     let value = getItem(config, option.path);
     if (option.nullable === true && option.type === 'text' && value == null)
       value = null;
@@ -141,7 +141,7 @@ if (window.top === window)
 
 function saveConfig() {
   const newConfig = {};
-  allOptions.forEach(option => {
+  allOptions.forEach((option) => {
     let newValue = option.get();
     if (
       option.nullable === true &&

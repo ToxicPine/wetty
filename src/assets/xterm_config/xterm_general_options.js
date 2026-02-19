@@ -76,27 +76,27 @@ window.inflateOptions([
   {
     type: 'enum',
     name: 'Cursor Style',
-    description: 'The style of the cursor',
+    description: 'The style of the cursor.',
     path: ['xterm', 'cursorStyle'],
     enum: ['block', 'underline', 'bar'],
   },
   {
     type: 'boolean',
     name: 'Blinking Cursor',
-    description: 'Whether the cursor blinks',
+    description: 'Whether the cursor blinks.',
     path: ['xterm', 'cursorBlink'],
   },
   {
     type: 'number',
     name: 'Bar Cursor Width',
     description:
-      "The width of the cursor in CSS pixels. Only applies when Cursor Style is set to 'bar'.",
+      "The width of the cursor in CSS pixels. Only applies when cursor style is set to 'bar'.",
     path: ['xterm', 'cursorWidth'],
   },
   {
     type: 'boolean',
     name: 'Draw Bold Text In Bright Colors',
-    description: 'Whether to draw bold text in bright colors',
+    description: 'Whether to draw bold text in bright colors.',
     path: ['xterm', 'drawBoldTextInBrightColors'],
   },
   {
@@ -107,24 +107,10 @@ window.inflateOptions([
     float: true,
   },
   {
-    type: 'enum',
-    name: 'Fast Scroll Key',
-    description: 'The modifier key to hold to multiply scroll speed.',
-    path: ['xterm', 'fastScrollModifier'],
-    enum: ['none', 'alt', 'shift', 'ctrl'],
-  },
-  {
-    type: 'number',
-    name: 'Fast Scroll Multiplier',
-    description: 'The scroll speed multiplier used for fast scrolling.',
-    path: ['xterm', 'fastScrollSensitivity'],
-    float: true,
-  },
-  {
     type: 'number',
     name: 'Scrollback Rows',
     description:
-      'The amount of scrollback rows, rows you can scroll up to after they leave the viewport, to keep.',
+      'The amount of scrollback rows to keep after they leave the viewport.',
     path: ['xterm', 'scrollback'],
   },
   {

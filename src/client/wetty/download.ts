@@ -1,22 +1,34 @@
 import fileType from 'file-type';
-import Toastify from 'toastify-js';
 
 const DEFAULT_FILE_BEGIN = '\u001b[5i';
 const DEFAULT_FILE_END = '\u001b[4i';
 
 type OnCompleteFile = (bufferCharacters: string) => void;
 
+function showToast(fileName: string, blobUrl: string, duration = 10000): void {
+  const el = document.createElement('div');
+  el.className = 'wetty-toast';
+  el.append('Download ready: ');
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.target = '_blank';
+  a.download = fileName;
+  a.textContent = fileName;
+  el.appendChild(a);
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
 function onCompleteFile(bufferCharacters: string): void {
   let fileNameBase64;
   let fileCharacters = bufferCharacters;
-  if (bufferCharacters.includes(":")) {
-    [fileNameBase64, fileCharacters] = bufferCharacters.split(":");
+  if (bufferCharacters.includes(':')) {
+    [fileNameBase64, fileCharacters] = bufferCharacters.split(':');
   }
-  // Try to decode it as base64, if it fails we assume it's not base64
   try {
     fileCharacters = window.atob(fileCharacters);
-  } catch (err) {
-    // Assuming it's not base64...
+  } catch {
+    // Assuming it's not base64
   }
 
   const bytes = new Uint8Array(fileCharacters.length);
@@ -31,46 +43,34 @@ function onCompleteFile(bufferCharacters: string): void {
     mimeType = typeData.mime;
     fileExt = typeData.ext;
   }
-  // Check if the buffer is ASCII
-  // Ref: https://stackoverflow.com/a/14313213
   // eslint-disable-next-line no-control-regex
   else if (/^[\x00-\xFF]*$/.test(fileCharacters)) {
     mimeType = 'text/plain';
     fileExt = 'txt';
   }
+
   let fileName;
   try {
     if (fileNameBase64 !== undefined) {
       fileName = window.atob(fileNameBase64);
     }
-  } catch (err) {
-    // Filename wasn't base64-encoded so let's ignore it
+  } catch {
+    // Filename wasn't base64-encoded
   }
 
   if (fileName === undefined) {
-    fileName = `file-${new Date()
+    const ts = new Date()
       .toISOString()
       .split('.')[0]
       .replace(/-/g, '')
       .replace('T', '')
-      .replace(/:/g, '')}${fileExt ? `.${fileExt}` : ''}`;
+      .replace(/:/g, '');
+    fileName = `file-${ts}${fileExt ? `.${fileExt}` : ''}`;
   }
 
-  const blob = new Blob([new Uint8Array(bytes.buffer)], {
-    type: mimeType,
-  });
+  const blob = new Blob([new Uint8Array(bytes.buffer)], { type: mimeType });
   const blobUrl = URL.createObjectURL(blob);
-
-  Toastify({
-    text: `Download ready: <a href="${blobUrl}" target="_blank" download="${fileName}">${fileName}</a>`,
-    duration: 10000,
-    newWindow: true,
-    gravity: 'bottom',
-    position: 'right',
-    backgroundColor: '#fff',
-    stopOnFocus: true,
-    escapeMarkup: false,
-  }).showToast();
+  showToast(fileName, blobUrl);
 }
 
 export class FileDownloader {
@@ -93,49 +93,32 @@ export class FileDownloader {
   }
 
   bufferCharacter(character: string): string {
-    // If we are not currently buffering a file.
     if (this.fileBuffer.length === 0) {
-      // If we are not currently expecting the rest of the fileBegin sequences.
       if (this.partialFileBegin.length === 0) {
-        // If the character is the first character of fileBegin we know to start
-        // expecting the rest of the fileBegin sequence.
         if (character === this.fileBegin[0]) {
           this.partialFileBegin = character;
           return '';
         }
-        // Otherwise, we just return the character for printing to the terminal.
-
         return character;
       }
-      // We're currently in the state of buffering a beginner marker...
 
-      const nextExpectedCharacter =
-        this.fileBegin[this.partialFileBegin.length];
-      // If the next character *is* the next character in the fileBegin sequence.
-      if (character === nextExpectedCharacter) {
+      const nextExpected = this.fileBegin[this.partialFileBegin.length];
+      if (character === nextExpected) {
         this.partialFileBegin += character;
-        // Do we now have the complete fileBegin sequence.
         if (this.partialFileBegin === this.fileBegin) {
           this.partialFileBegin = '';
           this.fileBuffer = this.fileBuffer.concat(this.fileBegin.split(''));
           return '';
         }
-        // Otherwise, we just wait until the next character.
-
         return '';
       }
-      // If the next expected character wasn't found for the fileBegin sequence,
-      // we need to return all the data that was bufferd in the partialFileBegin
-      // back to the terminal.
 
-      const dataToReturn = this.partialFileBegin + character;
+      const data = this.partialFileBegin + character;
       this.partialFileBegin = '';
-      return dataToReturn;
+      return data;
     }
-    // If we are currently in the state of buffering a file.
 
     this.fileBuffer.push(character);
-    // If we now have an entire fileEnd marker, we have a complete file!
     if (
       this.fileBuffer.length >= this.fileBegin.length + this.fileEnd.length &&
       this.fileBuffer.slice(-this.fileEnd.length).join('') === this.fileEnd
@@ -155,8 +138,6 @@ export class FileDownloader {
   }
 
   buffer(data: string): string {
-    // This is a optimization to quickly return if we know for
-    // sure we don't need to loop over each character.
     if (
       this.fileBuffer.length === 0 &&
       this.partialFileBegin.length === 0 &&

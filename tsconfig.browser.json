@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "lib": ["DOM"],
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "noEmit": true,
     "incremental": true
   },

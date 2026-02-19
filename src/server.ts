@@ -3,7 +3,6 @@
  * @module WeTTy
  */
 import express from 'express';
-import gc from 'gc-stats';
 import { Gauge, collectDefaultMetrics } from 'prom-client';
 import { getCommand } from './server/command.js';
 import { gcMetrics } from './server/metrics.js';
@@ -60,7 +59,12 @@ export async function decorateServerWithSsh(
   }
 
   collectDefaultMetrics();
-  gc().on('stats', gcMetrics);
+  try {
+    const { default: gc } = await import('gc-stats');
+    gc().on('stats', gcMetrics);
+  } catch {
+    // gc-stats native module not available
+  }
 
   const io = await server(app, serverConf, ssl);
   /**

@@ -1,11 +1,10 @@
 import {spawn} from 'node:child_process';
 import * as esbuild from 'esbuild';
 import {copy} from 'esbuild-plugin-copy';
-import {sassPlugin} from 'esbuild-sass-plugin';
 
 
 /** @param {string} prog
- * @param {string[]} [args=[]] 
+ * @param {string[]} [args=[]]
  * @returns {[ChildProcess, Promise<{ret: number, sig: NodeJS.Signals}>]}
  */
 function cmd(prog, args=[]) {
@@ -20,7 +19,7 @@ function cmd(prog, args=[]) {
 
 /** @type import('esbuild').Plugin */
 const typechecker = {
-    name: 'typechecker', 
+    name: 'typechecker',
     setup(build) {
         build.onStart(async () => {
             const [_tsc, tscDone] = cmd('pnpm', ['tsc', '-p', 'tsconfig.browser.json']);
@@ -48,11 +47,6 @@ async function buildClient(watching){
         sourcemap: !watching,
         plugins: [
             typechecker,
-            sassPlugin({
-                embedded: true,
-                loadPaths: ['node_modules'],
-                style: watching ? 'expanded' : 'compressed',
-            }),
             copy({
                 assets: [
                     {from: './src/assets/xterm_config/*', to: 'xterm_config'},
@@ -84,4 +78,3 @@ async function buildServer(watching) {
 const watching = process.argv.includes('--watch');
 await buildClient(watching);
 await buildServer(watching);
-

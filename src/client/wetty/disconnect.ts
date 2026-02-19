@@ -1,11 +1,13 @@
-import _ from 'lodash';
-import { overlay } from './disconnect/elements';
-import { verifyPrompt } from './disconnect/verify';
+export function confirmUnload(e: BeforeUnloadEvent): string {
+  e.returnValue = 'Are you sure?';
+  return e.returnValue;
+}
 
 export function disconnect(reason: string): void {
-  if (_.isNull(overlay)) return;
+  const overlay = document.getElementById('overlay');
+  if (overlay === null) return;
   overlay.style.display = 'block';
   const msg = document.getElementById('msg');
-  if (!_.isUndefined(reason) && !_.isNull(msg)) msg.innerHTML = reason;
-  window.removeEventListener('beforeunload', verifyPrompt, false);
+  if (reason !== undefined && msg !== null) msg.textContent = reason;
+  window.removeEventListener('beforeunload', confirmUnload);
 }

@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
-import isUndefined from 'lodash/isUndefined.js';
 import {
   sshDefault,
   serverDefault,
@@ -23,12 +22,6 @@ type confValue =
   | Server
   | SSL;
 
-/**
- * Cast given value to boolean
- *
- * @param value - variable to cast
- * @returns variable cast to boolean
- */
 function ensureBoolean(value: confValue): boolean {
   switch (value) {
     case true:
@@ -47,7 +40,7 @@ function parseLogLevel(
   confLevel: typeof winston.level,
   optsLevel: unknown,
 ): typeof winston.level {
-  const logLevel = isUndefined(optsLevel) ? confLevel : `${optsLevel}`;
+  const logLevel = optsLevel === undefined ? confLevel : `${optsLevel}`;
   return [
     'error',
     'warn',
@@ -61,15 +54,8 @@ function parseLogLevel(
     : defaultLogLevel;
 }
 
-/**
- * Load JSON5 config from file and merge with default args
- * If no path is provided the default config is returned
- *
- * @param filepath - path to config to load
- * @returns variable cast to boolean
- */
 export async function loadConfigFile(filepath?: string): Promise<Config> {
-  if (isUndefined(filepath)) {
+  if (filepath === undefined) {
     return {
       ssh: sshDefault,
       server: serverDefault,
@@ -81,29 +67,25 @@ export async function loadConfigFile(filepath?: string): Promise<Config> {
   const content = await fs.readFile(path.resolve(filepath));
   const parsed = JSON5.parse(content.toString()) as Config;
   return {
-    ssh: isUndefined(parsed.ssh)
-      ? sshDefault
-      : Object.assign(sshDefault, parsed.ssh),
-    server: isUndefined(parsed.server)
-      ? serverDefault
-      : Object.assign(serverDefault, parsed.server),
-    command: isUndefined(parsed.command) ? defaultCommand : `${parsed.command}`,
-    forceSSH: isUndefined(parsed.forceSSH)
-      ? forceSSHDefault
-      : ensureBoolean(parsed.forceSSH),
+    ssh:
+      parsed.ssh === undefined
+        ? sshDefault
+        : Object.assign(sshDefault, parsed.ssh),
+    server:
+      parsed.server === undefined
+        ? serverDefault
+        : Object.assign(serverDefault, parsed.server),
+    command:
+      parsed.command === undefined ? defaultCommand : `${parsed.command}`,
+    forceSSH:
+      parsed.forceSSH === undefined
+        ? forceSSHDefault
+        : ensureBoolean(parsed.forceSSH),
     ssl: parsed.ssl,
     logLevel: parseLogLevel(defaultLogLevel, parsed.logLevel),
   };
 }
 
-/**
- * Merge 2 objects removing undefined fields
- *
- * @param target - base object
- * @param source - object to get new values from
- * @returns merged object
- *
- */
 const objectAssign = (
   target: SSH | Server,
   source: Record<string, confValue>,
@@ -111,18 +93,10 @@ const objectAssign = (
   Object.fromEntries(
     Object.entries(source).map(([key, value]) => [
       key,
-      isUndefined(source[key]) ? target[key] : value,
+      source[key] === undefined ? target[key] : value,
     ]),
   ) as SSH | Server;
 
-/**
- * Merge cli arguemens with config object
- *
- * @param opts - Object containing cli args
- * @param config - Config object
- * @returns merged configuration
- *
- */
 export function mergeCliConf(opts: Arguments, config: Config): Config {
   const ssl = {
     key: opts['ssl-key'],
@@ -150,11 +124,12 @@ export function mergeCliConf(opts: Arguments, config: Config): Config {
       title: opts.title,
       allowIframe: opts['allow-iframe'],
     }) as Server,
-    command: isUndefined(opts.command) ? config.command : `${opts.command}`,
-    forceSSH: isUndefined(opts['force-ssh'])
-      ? config.forceSSH
-      : ensureBoolean(opts['force-ssh']),
-    ssl: isUndefined(ssl.key) || isUndefined(ssl.cert) ? undefined : ssl,
+    command: opts.command === undefined ? config.command : `${opts.command}`,
+    forceSSH:
+      opts['force-ssh'] === undefined
+        ? config.forceSSH
+        : ensureBoolean(opts['force-ssh']),
+    ssl: ssl.key === undefined || ssl.cert === undefined ? undefined : ssl,
     logLevel: parseLogLevel(config.logLevel, opts['log-level']),
   };
 }

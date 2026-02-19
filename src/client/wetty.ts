@@ -1,63 +1,57 @@
-import { dom, library } from '@fortawesome/fontawesome-svg-core';
-import { faCogs, faKeyboard } from '@fortawesome/free-solid-svg-icons';
-import _ from 'lodash';
+import '../assets/css/styles.css';
 
-import '../assets/scss/styles.scss';
-
-import { disconnect } from './wetty/disconnect';
-import { overlay } from './wetty/disconnect/elements';
-import { verifyPrompt } from './wetty/disconnect/verify';
+import { disconnect, confirmUnload } from './wetty/disconnect';
 import { FileDownloader } from './wetty/download';
 import { FlowControlClient } from './wetty/flowcontrol';
-import { mobileKeyboard } from './wetty/mobile';
+import { setupKeyboard } from './wetty/keyboard';
+import { configureTerm } from './wetty/config';
+import { mobileKeyboard, setupMobileViewport } from './wetty/mobile';
 import { socket } from './wetty/socket';
-import { terminal, Term } from './wetty/term';
-
-// Setup for fontawesome
-library.add(faCogs);
-library.add(faKeyboard);
-dom.watch();
-
-function onResize(term: Term): () => void {
-  return function resize() {
-    term.resizeTerm();
-  };
-}
+import { Term } from './wetty/term';
 
 socket.on('connect', () => {
-  const term = terminal(socket);
-  if (_.isUndefined(term)) return;
+  const container = document.getElementById('terminal');
+  if (container === null) return;
 
-  if (!_.isNull(overlay)) overlay.style.display = 'none';
-  window.addEventListener('beforeunload', verifyPrompt, false);
-  window.addEventListener('resize', onResize(term), false);
+  const term = new Term(socket);
+  container.innerHTML = '';
+  term.open(container);
+  configureTerm(term);
+  setupKeyboard(term);
+
+  const overlay = document.getElementById('overlay');
+  if (overlay !== null) overlay.style.display = 'none';
+
+  window.addEventListener('beforeunload', confirmUnload);
+  window.onresize = () => term.resizeTerm();
 
   term.resizeTerm();
   term.focus();
   mobileKeyboard();
-  const fileDownloader = new FileDownloader();
-  const fcClient = new FlowControlClient();
+  setupMobileViewport(() => term.resizeTerm());
 
-  term.onData((data: string) => {
-    socket.emit('input', data);
-  });
-  term.onResize((size: { cols: number; rows: number }) => {
-    socket.emit('resize', size);
-  });
+  const downloader = new FileDownloader();
+  const flowControl = new FlowControlClient();
+
+  term.onData((data: string) => socket.emit('input', data));
+  term.onResize((size: { cols: number; rows: number }) =>
+    socket.emit('resize', size),
+  );
+
   socket
     .on('data', (data: string) => {
-      const remainingData = fileDownloader.buffer(data);
-      const downloadLength = data.length - remainingData.length;
-      if (downloadLength && fcClient.needsCommit(downloadLength)) {
-        socket.emit('commit', fcClient.ackBytes);
+      const remaining = downloader.buffer(data);
+      const downloadLen = data.length - remaining.length;
+      if (downloadLen && flowControl.consume(downloadLen)) {
+        socket.emit('commit', flowControl.ackBytes);
       }
-      if (remainingData) {
-        if (fcClient.needsCommit(remainingData.length)) {
-          term.write(remainingData, () =>
-            socket.emit('commit', fcClient.ackBytes),
+      if (remaining) {
+        if (flowControl.consume(remaining.length)) {
+          term.write(remaining, () =>
+            socket.emit('commit', flowControl.ackBytes),
           );
         } else {
-          term.write(remainingData);
+          term.write(remaining);
         }
       }
     })

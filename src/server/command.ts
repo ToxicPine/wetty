@@ -1,6 +1,5 @@
 import process from 'node:process';
 import url from 'url';
-import _ from 'lodash';
 import { address } from './command/address.js';
 import { loginOptions } from './command/login.js';
 import { sshOptions } from './command/ssh.js';
@@ -8,7 +7,7 @@ import type { SSH } from '../shared/interfaces';
 import type { Socket } from 'socket.io';
 
 const localhost = (host: string): boolean =>
-  !_.isUndefined(process.getuid) &&
+  process.getuid !== undefined &&
   process.getuid() === 0 &&
   (host === 'localhost' || host === '0.0.0.0' || host === '127.0.0.1');
 
@@ -21,13 +20,21 @@ const urlArgs = (
     allowRemoteCommand: boolean;
     allowRemoteHosts: boolean;
   },
-): { [s: string]: string } =>
-  _.pick(
-    _.pickBy(url.parse(referer || '', true).query, _.isString),
-    ['pass'],
-    allowRemoteCommand ? ['command', 'path'] : [],
-    allowRemoteHosts ? ['port', 'host'] : [],
-  );
+): Record<string, string> => {
+  const query = url.parse(referer || '', true).query;
+  const allowed = new Set([
+    'pass',
+    ...(allowRemoteCommand ? ['command', 'path'] : []),
+    ...(allowRemoteHosts ? ['port', 'host'] : []),
+  ]);
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(query)) {
+    if (allowed.has(key) && typeof value === 'string') {
+      result[key] = value;
+    }
+  }
+  return result;
+};
 
 export async function getCommand(
   socket: Socket,
@@ -44,11 +51,15 @@ export async function getCommand(
     allowRemoteCommand,
   }: SSH,
   command: string,
-  forcessh: boolean
+  forcessh: boolean,
 ): Promise<string[]> {
   const {
-    request: { headers: { referer } },
-    client: { conn: { remoteAddress } },
+    request: {
+      headers: { referer },
+    },
+    client: {
+      conn: { remoteAddress },
+    },
   } = socket;
 
   if (!forcessh && localhost(host)) {
