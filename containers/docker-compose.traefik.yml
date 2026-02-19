@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 
 # Sample docker compose file to demonstrate the usage of wetty behind a reverse
 # proxy, optionally with Let's Encrypt based SSL certificate

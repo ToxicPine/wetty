@@ -1,15 +1,15 @@
-import process from 'node:process';
-import url from 'url';
-import { address } from './command/address.js';
-import { loginOptions } from './command/login.js';
-import { sshOptions } from './command/ssh.js';
-import type { SSH } from '../shared/interfaces';
-import type { Socket } from 'socket.io';
+import process from "node:process";
+import url from "url";
+import { address } from "./command/address.js";
+import { loginOptions } from "./command/login.js";
+import { sshOptions } from "./command/ssh.js";
+import type { SSH } from "../shared/interfaces";
+import type { Socket } from "socket.io";
 
 const localhost = (host: string): boolean =>
   process.getuid !== undefined &&
   process.getuid() === 0 &&
-  (host === 'localhost' || host === '0.0.0.0' || host === '127.0.0.1');
+  (host === "localhost" || host === "0.0.0.0" || host === "127.0.0.1");
 
 const urlArgs = (
   referer: string | undefined,
@@ -21,15 +21,15 @@ const urlArgs = (
     allowRemoteHosts: boolean;
   },
 ): Record<string, string> => {
-  const query = url.parse(referer || '', true).query;
+  const query = url.parse(referer || "", true).query;
   const allowed = new Set([
-    'pass',
-    ...(allowRemoteCommand ? ['command', 'path'] : []),
-    ...(allowRemoteHosts ? ['port', 'host'] : []),
+    "pass",
+    ...(allowRemoteCommand ? ["command", "path"] : []),
+    ...(allowRemoteHosts ? ["port", "host"] : []),
   ]);
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(query)) {
-    if (allowed.has(key) && typeof value === 'string') {
+    if (allowed.has(key) && typeof value === "string") {
       result[key] = value;
     }
   }
@@ -70,11 +70,11 @@ export async function getCommand(
   const args = {
     host: sshAddress,
     port: `${port}`,
-    pass: pass || '',
+    pass: pass || "",
     command,
     auth,
     knownHosts,
-    config: config || '',
+    config: config || "",
     ...urlArgs(referer, { allowRemoteHosts, allowRemoteCommand }),
   };
   return sshOptions(args, key);

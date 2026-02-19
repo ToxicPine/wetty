@@ -1,4 +1,4 @@
-import type winston from 'winston';
+import type winston from "winston";
 
 export interface SSH {
   [s: string]: string | number | boolean | undefined;

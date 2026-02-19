@@ -1,10 +1,10 @@
-import http from 'http';
-import https from 'https';
-import { Server } from 'socket.io';
+import http from "http";
+import https from "https";
+import { Server } from "socket.io";
 
-import { logger } from '../../shared/logger.js';
-import type { SSLBuffer } from '../../shared/interfaces.js';
-import type express from 'express';
+import { logger } from "../../shared/logger.js";
+import type { SSLBuffer } from "../../shared/interfaces.js";
+import type express from "express";
 
 export const listen = (
   app: express.Express,
@@ -14,20 +14,19 @@ export const listen = (
   { key, cert }: SSLBuffer,
   socket?: string | boolean,
 ): Server => {
-  const server =
-    key !== undefined && cert !== undefined
-      ? https.createServer({ key, cert }, app)
-      : http.createServer(app);
+  const server = key !== undefined && cert !== undefined
+    ? https.createServer({ key, cert }, app)
+    : http.createServer(app);
 
   if (socket) {
     server.listen(socket, () => {
-      logger().info('Server listening on Unix socket', { socket });
+      logger().info("Server listening on Unix socket", { socket });
     });
   } else {
     server.listen(port, host, () => {
-      logger().info('Server started', {
+      logger().info("Server started", {
         port,
-        connection: key !== undefined && cert !== undefined ? 'https' : 'http',
+        connection: key !== undefined && cert !== undefined ? "https" : "http",
       });
     });
   }

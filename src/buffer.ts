@@ -1,6 +1,6 @@
-import { createInterface } from 'readline';
+import { createInterface } from "readline";
 
-ask('Enter your username');
+ask("Enter your username");
 
 function ask(question: string): Promise<string> {
   const rlp = createInterface({

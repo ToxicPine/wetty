@@ -6,7 +6,7 @@ on:
       working-directory:
         required: false
         type: string
-        default: '.'
+        default: "."
 jobs:
   build_and_test:
     name: Build & Test
@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install

@@ -2,29 +2,29 @@
  * Create WeTTY server
  * @module WeTTy
  */
-import express from 'express';
-import { Gauge, collectDefaultMetrics } from 'prom-client';
-import { getCommand } from './server/command.js';
-import { gcMetrics } from './server/metrics.js';
-import { server } from './server/socketServer.js';
-import { spawn } from './server/spawn.js';
+import express from "express";
+import { collectDefaultMetrics, Gauge } from "prom-client";
+import { getCommand } from "./server/command.js";
+import { gcMetrics } from "./server/metrics.js";
+import { server } from "./server/socketServer.js";
+import { spawn } from "./server/spawn.js";
 import {
-  sshDefault,
-  serverDefault,
-  forceSSHDefault,
   defaultCommand,
-} from './shared/defaults.js';
-import { logger as getLogger } from './shared/logger.js';
-import type { SSH, SSL, Server } from './shared/interfaces.js';
-import type { Express } from 'express';
-import type SocketIO from 'socket.io';
+  forceSSHDefault,
+  serverDefault,
+  sshDefault,
+} from "./shared/defaults.js";
+import { logger as getLogger } from "./shared/logger.js";
+import type { Server, SSH, SSL } from "./shared/interfaces.js";
+import type { Express } from "express";
+import type SocketIO from "socket.io";
 
-export * from './shared/interfaces.js';
-export { logger as getLogger } from './shared/logger.js';
+export * from "./shared/interfaces.js";
+export { logger as getLogger } from "./shared/logger.js";
 
 const wettyConnections = new Gauge({
-  name: 'wetty_connections',
-  help: 'number of active socket connections to wetty',
+  name: "wetty_connections",
+  help: "number of active socket connections to wetty",
 });
 
 /**
@@ -51,17 +51,19 @@ export async function decorateServerWithSsh(
 ): Promise<SocketIO.Server> {
   const logger = getLogger();
   if (ssh.key) {
-    logger.warn(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    logger.warn(
+      `!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Password-less auth enabled using private key from ${ssh.key}.
 ! This is dangerous, anything that reaches the wetty server
 ! will be able to run remote operations without authentication.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`,
+    );
   }
 
   collectDefaultMetrics();
   try {
-    const { default: gc } = await import('gc-stats');
-    gc().on('stats', gcMetrics);
+    const { default: gc } = await import("gc-stats");
+    gc().on("stats", gcMetrics);
   } catch {
     // gc-stats native module not available
   }
@@ -71,20 +73,20 @@ export async function decorateServerWithSsh(
    * Wetty server connected too
    * @fires WeTTy#connnection
    */
-  io.on('connection', async (socket: SocketIO.Socket) => {
+  io.on("connection", async (socket: SocketIO.Socket) => {
     /**
      * @event wetty#connection
      * @name connection
      */
-    logger.info('Connection accepted.');
+    logger.info("Connection accepted.");
     wettyConnections.inc();
 
     try {
       const args = await getCommand(socket, ssh, command, forcessh);
-      logger.debug('Command Generated', { cmd: args.join(' ') });
+      logger.debug("Command Generated", { cmd: args.join(" ") });
       await spawn(socket, args);
     } catch (error) {
-      logger.info('Disconnect signal sent', { err: error });
+      logger.info("Disconnect signal sent", { err: error });
       wettyConnections.dec();
     }
   });

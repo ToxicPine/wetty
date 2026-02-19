@@ -8,25 +8,18 @@ export function mobileKeyboard(): void {
   screen.setAttribute('autocapitalize', 'false');
 }
 
-function debounce(fn: () => void, ms: number): () => void {
-  let timer: ReturnType<typeof setTimeout>;
-  return () => {
-    clearTimeout(timer);
-    timer = setTimeout(fn, ms);
-  };
-}
-
 export function setupMobileViewport(onResize: () => void): void {
-  if (!window.visualViewport) return;
+  const vv = window.visualViewport;
+  if (!vv) return;
 
-  const debouncedResize = debounce(onResize, 100);
+  let timer: ReturnType<typeof setTimeout>;
 
-  const update = () => {
-    const vv = window.visualViewport!;
-    document.body.style.height = `${vv.height}px`;
-    debouncedResize();
+  const update = (): void => {
+    document.documentElement.style.setProperty('--vh', `${vv.height}px`);
+    clearTimeout(timer);
+    timer = setTimeout(onResize, 100);
   };
 
-  window.visualViewport.addEventListener('resize', update);
+  vv.addEventListener('resize', update);
   update();
 }

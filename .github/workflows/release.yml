@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 jobs:
   release:
     name: Create Release
@@ -13,9 +13,9 @@ jobs:
         uses: fregante/release-with-changelog@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Release {tag}'
+          title: "Release {tag}"
           exclude: true
-          commit-template: '- {title} ← {hash}'
+          commit-template: "- {title} ← {hash}"
           template: |
             ### Changelog
 

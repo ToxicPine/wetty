@@ -1,17 +1,17 @@
-import fileType from 'file-type';
+import fileType from "file-type";
 
-const DEFAULT_FILE_BEGIN = '\u001b[5i';
-const DEFAULT_FILE_END = '\u001b[4i';
+const DEFAULT_FILE_BEGIN = "\u001b[5i";
+const DEFAULT_FILE_END = "\u001b[4i";
 
 type OnCompleteFile = (bufferCharacters: string) => void;
 
 function showToast(fileName: string, blobUrl: string, duration = 10000): void {
-  const el = document.createElement('div');
-  el.className = 'wetty-toast';
-  el.append('Download ready: ');
-  const a = document.createElement('a');
+  const el = document.createElement("div");
+  el.className = "wetty-toast";
+  el.append("Download ready: ");
+  const a = document.createElement("a");
   a.href = blobUrl;
-  a.target = '_blank';
+  a.target = "_blank";
   a.download = fileName;
   a.textContent = fileName;
   el.appendChild(a);
@@ -22,8 +22,8 @@ function showToast(fileName: string, blobUrl: string, duration = 10000): void {
 function onCompleteFile(bufferCharacters: string): void {
   let fileNameBase64;
   let fileCharacters = bufferCharacters;
-  if (bufferCharacters.includes(':')) {
-    [fileNameBase64, fileCharacters] = bufferCharacters.split(':');
+  if (bufferCharacters.includes(":")) {
+    [fileNameBase64, fileCharacters] = bufferCharacters.split(":");
   }
   try {
     fileCharacters = window.atob(fileCharacters);
@@ -36,17 +36,16 @@ function onCompleteFile(bufferCharacters: string): void {
     bytes[i] = fileCharacters.charCodeAt(i);
   }
 
-  let mimeType = 'application/octet-stream';
-  let fileExt = '';
+  let mimeType = "application/octet-stream";
+  let fileExt = "";
   const typeData = fileType(bytes);
   if (typeData) {
     mimeType = typeData.mime;
     fileExt = typeData.ext;
-  }
-  // eslint-disable-next-line no-control-regex
+  } // eslint-disable-next-line no-control-regex
   else if (/^[\x00-\xFF]*$/.test(fileCharacters)) {
-    mimeType = 'text/plain';
-    fileExt = 'txt';
+    mimeType = "text/plain";
+    fileExt = "txt";
   }
 
   let fileName;
@@ -61,11 +60,11 @@ function onCompleteFile(bufferCharacters: string): void {
   if (fileName === undefined) {
     const ts = new Date()
       .toISOString()
-      .split('.')[0]
-      .replace(/-/g, '')
-      .replace('T', '')
-      .replace(/:/g, '');
-    fileName = `file-${ts}${fileExt ? `.${fileExt}` : ''}`;
+      .split(".")[0]
+      .replace(/-/g, "")
+      .replace("T", "")
+      .replace(/:/g, "");
+    fileName = `file-${ts}${fileExt ? `.${fileExt}` : ""}`;
   }
 
   const blob = new Blob([new Uint8Array(bytes.buffer)], { type: mimeType });
@@ -88,7 +87,7 @@ export class FileDownloader {
     this.fileBuffer = [];
     this.fileBegin = fileBegin;
     this.fileEnd = fileEnd;
-    this.partialFileBegin = '';
+    this.partialFileBegin = "";
     this.onCompleteFileCallback = onCompleteFileCallback;
   }
 
@@ -97,7 +96,7 @@ export class FileDownloader {
       if (this.partialFileBegin.length === 0) {
         if (character === this.fileBegin[0]) {
           this.partialFileBegin = character;
-          return '';
+          return "";
         }
         return character;
       }
@@ -106,22 +105,22 @@ export class FileDownloader {
       if (character === nextExpected) {
         this.partialFileBegin += character;
         if (this.partialFileBegin === this.fileBegin) {
-          this.partialFileBegin = '';
-          this.fileBuffer = this.fileBuffer.concat(this.fileBegin.split(''));
-          return '';
+          this.partialFileBegin = "";
+          this.fileBuffer = this.fileBuffer.concat(this.fileBegin.split(""));
+          return "";
         }
-        return '';
+        return "";
       }
 
       const data = this.partialFileBegin + character;
-      this.partialFileBegin = '';
+      this.partialFileBegin = "";
       return data;
     }
 
     this.fileBuffer.push(character);
     if (
       this.fileBuffer.length >= this.fileBegin.length + this.fileEnd.length &&
-      this.fileBuffer.slice(-this.fileEnd.length).join('') === this.fileEnd
+      this.fileBuffer.slice(-this.fileEnd.length).join("") === this.fileEnd
     ) {
       this.onCompleteFileCallback(
         this.fileBuffer
@@ -129,12 +128,12 @@ export class FileDownloader {
             this.fileBegin.length,
             this.fileBuffer.length - this.fileEnd.length,
           )
-          .join(''),
+          .join(""),
       );
       this.fileBuffer = [];
     }
 
-    return '';
+    return "";
   }
 
   buffer(data: string): string {
@@ -145,6 +144,6 @@ export class FileDownloader {
     ) {
       return data;
     }
-    return data.split('').map(this.bufferCharacter.bind(this)).join('');
+    return data.split("").map(this.bufferCharacter.bind(this)).join("");
   }
 }

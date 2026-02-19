@@ -59,7 +59,7 @@ export function setupKeyboard(term: Term): void {
     bar.type = 'text';
     bar.placeholder = 'Paste Here, Then Press Enter';
     bar.style.cssText =
-      'position:fixed;bottom:0;left:0;width:100%;height:48px;z-index:9999;' +
+      'position:absolute;bottom:0;left:0;width:100%;height:48px;z-index:9999;' +
       'font-size:16px;padding:0 16px;background:#111;color:#fff;border:none;' +
       'border-top:1px solid #333;outline:none;box-sizing:border-box;';
     document.body.appendChild(bar);

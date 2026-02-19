@@ -1,34 +1,34 @@
-import url from 'url';
-import { register, Counter, Histogram } from 'prom-client';
-import ResponseTime from 'response-time';
-import UrlValueParser from 'url-value-parser';
-import type { Request, Response, RequestHandler } from 'express';
+import url from "url";
+import { Counter, Histogram, register } from "prom-client";
+import ResponseTime from "response-time";
+import UrlValueParser from "url-value-parser";
+import type { Request, RequestHandler, Response } from "express";
 
-const requestLabels = ['route', 'method', 'status'];
+const requestLabels = ["route", "method", "status"];
 
 const requestCount = new Counter({
-  name: 'http_requests_total',
-  help: 'Counter for total requests received',
+  name: "http_requests_total",
+  help: "Counter for total requests received",
   labelNames: requestLabels,
 });
 
 const requestDuration = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
+  name: "http_request_duration_seconds",
+  help: "Duration of HTTP requests in seconds",
   labelNames: requestLabels,
   buckets: [0.01, 0.1, 0.5, 1, 1.5],
 });
 
 const requestLength = new Histogram({
-  name: 'http_request_length_bytes',
-  help: 'Content-Length of HTTP request',
+  name: "http_request_length_bytes",
+  help: "Content-Length of HTTP request",
   labelNames: requestLabels,
   buckets: [512, 1024, 5120, 10240, 51200, 102400],
 });
 
 const responseLength = new Histogram({
-  name: 'http_response_length_bytes',
-  help: 'Content-Length of HTTP response',
+  name: "http_response_length_bytes",
+  help: "Content-Length of HTTP response",
   labelNames: requestLabels,
   buckets: [512, 1024, 5120, 10240, 51200, 102400],
 });
@@ -49,10 +49,10 @@ const responseLength = new Histogram({
  * @param {string} [placeholder='#val'] - the placeholder that will replace id like params in the url path.
  * @returns {string} a normalized path, withoud ids.
  */
-function normalizePath(originalUrl: string, placeholder = '#val'): string {
+function normalizePath(originalUrl: string, placeholder = "#val"): string {
   const { pathname } = url.parse(originalUrl);
   const urlParser = new UrlValueParser();
-  return urlParser.replacePathValues(pathname || '', placeholder);
+  return urlParser.replacePathValues(pathname || "", placeholder);
 }
 
 /**
@@ -62,18 +62,18 @@ function normalizePath(originalUrl: string, placeholder = '#val'): string {
  */
 function normalizeStatusCode(status: number): string {
   if (status >= 200 && status < 300) {
-    return '2XX';
+    return "2XX";
   }
 
   if (status >= 300 && status < 400) {
-    return '3XX';
+    return "3XX";
   }
 
   if (status >= 400 && status < 500) {
-    return '4XX';
+    return "4XX";
   }
 
-  return '5XX';
+  return "5XX";
 }
 
 export function metricMiddleware(basePath: string): RequestHandler {
@@ -103,13 +103,13 @@ export function metricMiddleware(basePath: string): RequestHandler {
       requestDuration.observe(labels, time / 1000);
 
       // observe request length
-      const reqLength = req.get('Content-Length');
+      const reqLength = req.get("Content-Length");
       if (reqLength) {
         requestLength.observe(labels, Number(reqLength));
       }
 
       // observe response length
-      const resLength = res.get('Content-Length');
+      const resLength = res.get("Content-Length");
       if (resLength) {
         responseLength.observe(labels, Number(resLength));
       }
@@ -121,6 +121,6 @@ export function metricMiddleware(basePath: string): RequestHandler {
  * Metrics route to be used by prometheus to scrape metrics
  */
 export async function metricRoute(_req: Request, res: Response): Promise<void> {
-  res.set('Content-Type', register.contentType);
+  res.set("Content-Type", register.contentType);
   res.end(await register.metrics());
 }

@@ -1,9 +1,10 @@
-import { isDev } from '../../shared/env.js';
-import type { Request, Response, RequestHandler } from 'express';
+import { isDev } from "../../shared/env.js";
+import type { Request, RequestHandler, Response } from "express";
 
-const jsFiles = isDev ? ['dev.js', 'wetty.js'] : ['wetty.js'];
+const jsFiles = isDev ? ["dev.js", "wetty.js"] : ["wetty.js"];
 
-const render = (title: string, base: string): string => `<!doctype html>
+const render = (title: string, base: string): string =>
+  `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf8">
@@ -11,6 +12,9 @@ const render = (title: string, base: string): string => `<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content">
     <link rel="icon" type="image/x-icon" href="${base}/client/favicon.ico">
     <title>${title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&display=swap">
     <link rel="stylesheet" href="${base}/client/wetty.css" />
   </head>
   <body>
@@ -45,12 +49,14 @@ const render = (title: string, base: string): string => `<!doctype html>
       </div>
     </div>
     <div id="terminal"></div>
-    ${jsFiles
+    ${
+    jsFiles
       .map(
         (file) =>
           `    <script type="module" src="${base}/client/${file}"></script>`,
       )
-      .join('\n')}
+      .join("\n")
+  }
   </body>
 </html>`;
 

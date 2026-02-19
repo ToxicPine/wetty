@@ -1,4 +1,4 @@
-import { logger } from '../../shared/logger.js';
+import { logger } from "../../shared/logger.js";
 
 export function sshOptions(
   {
@@ -14,32 +14,32 @@ export function sshOptions(
   key?: string,
 ): string[] {
   const cmd = parseCommand(command, path);
-  const hostChecking = knownHosts !== '/dev/null' ? 'yes' : 'no';
+  const hostChecking = knownHosts !== "/dev/null" ? "yes" : "no";
   logger().info(`Authentication Type: ${auth}`);
 
   return [
-    ...(pass ? ['sshpass', '-p', pass] : []),
-    'ssh',
-    '-t',
-    ...(config ? ['-F', config] : []),
-    ...(port ? ['-p', port] : []),
-    ...(key ? ['-i', key] : []),
-    ...(auth !== 'none' ? ['-o', `PreferredAuthentications=${auth}`] : []),
-    '-o',
+    ...(pass ? ["sshpass", "-p", pass] : []),
+    "ssh",
+    "-t",
+    ...(config ? ["-F", config] : []),
+    ...(port ? ["-p", port] : []),
+    ...(key ? ["-i", key] : []),
+    ...(auth !== "none" ? ["-o", `PreferredAuthentications=${auth}`] : []),
+    "-o",
     `UserKnownHostsFile=${knownHosts}`,
-    '-o',
+    "-o",
     `StrictHostKeyChecking=${hostChecking}`,
-    '-o',
-    'EscapeChar=none',
-    '--',
+    "-o",
+    "EscapeChar=none",
+    "--",
     host,
     ...(cmd ? [cmd] : []),
   ];
 }
 
 function parseCommand(command: string, path?: string): string {
-  if (command === 'login' && path === undefined) return '';
+  if (command === "login" && path === undefined) return "";
   return path !== undefined
-    ? `$SHELL -c "cd ${path};${command === 'login' ? '$SHELL' : command}"`
+    ? `$SHELL -c "cd ${path};${command === "login" ? "$SHELL" : command}"`
     : command;
 }

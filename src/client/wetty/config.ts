@@ -1,6 +1,6 @@
-import type { Term } from './term';
-import { loadOptions, saveOptions, type Options } from './options';
-import { copyToClipboard, copyShortcut } from './clipboard';
+import type { Term } from "./term";
+import { loadOptions, type Options, saveOptions } from "./options";
+import { copyShortcut, copyToClipboard } from "./clipboard";
 
 declare global {
   interface Window {
@@ -25,24 +25,24 @@ function applyOptions(term: Term): void {
 
 function setupClipboard(term: Term): void {
   term.attachCustomKeyEventHandler(copyShortcut);
-  document.addEventListener('mouseup', () => {
+  document.addEventListener("mouseup", () => {
     if (term.hasSelection()) copyToClipboard(term.getSelection());
   });
 }
 
 function setupSettingsModal(term: Term): void {
-  const modal = document.getElementById('settings-modal');
+  const modal = document.getElementById("settings-modal");
   const editor = modal?.querySelector(
-    'iframe.editor',
+    "iframe.editor",
   ) as HTMLIFrameElement | null;
   if (!modal || !editor) return;
 
   const open = (): void => {
     editor.contentWindow?.loadOptions(loadOptions());
-    modal.classList.add('open');
+    modal.classList.add("open");
   };
   const close = (): void => {
-    modal.classList.remove('open');
+    modal.classList.remove("open");
     term.focus();
   };
 
@@ -66,28 +66,32 @@ function setupSettingsModal(term: Term): void {
         term.resizeTerm();
         saveOptions(updated);
       } catch (e) {
-        console.error('Configuration error', e);
+        console.error("Configuration error", e);
       }
     };
   }
 
   const doc = editor.contentDocument ?? editor.contentWindow?.document;
-  if (doc?.readyState === 'complete') initEditor();
-  editor.addEventListener('load', initEditor);
+  if (doc?.readyState === "complete") initEditor();
+  editor.addEventListener("load", initEditor);
 
-  for (const el of document.querySelectorAll<HTMLElement>(
-    '[data-action="toggle-settings"]',
-  )) {
-    el.addEventListener('click', () => open());
+  for (
+    const el of document.querySelectorAll<HTMLElement>(
+      '[data-action="toggle-settings"]',
+    )
+  ) {
+    el.addEventListener("click", () => open());
   }
-  for (const el of document.querySelectorAll<HTMLElement>(
-    '[data-action="close-settings"]',
-  )) {
-    el.addEventListener('click', () => close());
+  for (
+    const el of document.querySelectorAll<HTMLElement>(
+      '[data-action="close-settings"]',
+    )
+  ) {
+    el.addEventListener("click", () => close());
   }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) {
       e.preventDefault();
       close();
     }

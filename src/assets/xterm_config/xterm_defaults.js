@@ -13,7 +13,7 @@ window.loadOptions({
     bellSound: DEFAULT_BELL_SOUND,
     bellStyle: 'none',
     drawBoldTextInBrightColors: true,
-    fontFamily: 'courier-new, courier, monospace',
+    fontFamily: "'IBM Plex Mono', 'Symbols Nerd Font Mono', monospace",
     fontSize: 15,
     fontWeight: 'normal',
     fontWeightBold: 'bold',

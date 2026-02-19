@@ -1,5 +1,5 @@
 ---
-version: '3.5'
+version: "3.5"
 services:
   wetty:
     image: wettyoss/wetty
@@ -10,18 +10,18 @@ services:
     tty: true
     working_dir: /usr/src/app
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
-      SSHHOST: 'wetty-ssh'
+      SSHHOST: "wetty-ssh"
       SSHPORT: 22
-      NODE_ENV: 'development'
+      NODE_ENV: "development"
 
   web:
     image: nginx
     volumes:
       - ./conf/nginx.template:/etc/nginx/conf.d/wetty.template
     ports:
-      - '80:80'
+      - "80:80"
     environment:
       - NGINX_DOMAIN=wetty.com
       - NGINX_PORT=80

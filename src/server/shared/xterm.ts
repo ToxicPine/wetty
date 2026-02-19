@@ -1,7 +1,7 @@
-import type { IPtyForkOptions } from 'node-pty';
+import type { IPtyForkOptions } from "node-pty";
 
 export const xterm: IPtyForkOptions = {
-  name: 'xterm-256color',
+  name: "xterm-256color",
   cols: 80,
   rows: 30,
   cwd: process.cwd(),

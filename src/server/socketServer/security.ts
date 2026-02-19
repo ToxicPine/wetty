@@ -10,8 +10,17 @@ export const policies =
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          fontSrc: ["'self'", 'data:'],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            'https://fonts.googleapis.com',
+          ],
+          fontSrc: [
+            "'self'",
+            'data:',
+            'https://fonts.gstatic.com',
+            'https://cdn.jsdelivr.net',
+          ],
           connectSrc: [
             "'self'",
             (req.protocol === 'http' ? 'ws://' : 'wss://') + req.get('host'),

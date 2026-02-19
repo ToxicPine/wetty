@@ -1,4 +1,4 @@
-import { Socket } from 'socket.io';
+import { Socket } from "socket.io";
 
 /**
  * Coalesces PTY output to reduce WebSocket message pressure.
@@ -11,7 +11,7 @@ export function tinybuffer(socket: Socket, timeout: number, maxSize: number) {
   let timer: NodeJS.Timeout | null = null;
 
   const flush = () => {
-    socket.emit('data', chunks.join(''));
+    socket.emit("data", chunks.join(""));
     chunks.length = 0;
     length = 0;
     if (timer) {
