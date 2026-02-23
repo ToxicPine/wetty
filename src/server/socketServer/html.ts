@@ -28,15 +28,20 @@ const render = (title: string, base: string): string =>
       <button data-action="toggle-keyboard" aria-label="Keyboard">\u2328</button>
       <button data-action="toggle-settings" aria-label="Settings">\u2699</button>
     </div>
-    <div id="keyboard-panel">
-      <button data-action="esc">Esc</button>
-      <button data-action="up">\u2191</button>
-      <button data-action="tab">Tab</button>
-      <button data-action="paste">Paste</button>
-      <button data-action="left">\u2190</button>
-      <button data-action="down">\u2193</button>
-      <button data-action="right">\u2192</button>
-      <button id="onscreen-ctrl" data-action="toggle-ctrl">Ctrl</button>
+    <div id="controls-wrapper">
+      <div id="keyboard-panel">
+        <button data-action="esc">Esc</button>
+        <button data-action="up">\u2191</button>
+        <button data-action="tab">Tab</button>
+        <button data-action="paste">Paste</button>
+        <button data-action="left">\u2190</button>
+        <button data-action="down">\u2193</button>
+        <button data-action="right">\u2192</button>
+        <button id="onscreen-ctrl" data-action="toggle-ctrl">Ctrl</button>
+      </div>
+      <div id="paste-bar">
+        <input type="text" placeholder="Paste Here, Then Press Enter" />
+      </div>
     </div>
     <div id="settings-modal">
       <div class="modal-backdrop" data-action="close-settings"></div>
